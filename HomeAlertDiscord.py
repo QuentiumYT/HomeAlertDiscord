@@ -5,12 +5,14 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter.messagebox import *
 from PIL import Image, ImageTk
-import os, dotenv
+import discord, os, dotenv, threading
+from discord.ext import commands
 
 dotenv.load_dotenv(".env")
-discord_bot_token = os.environ.get("TOKEN")
+bot_token = os.environ.get("TOKEN")
 user_list = os.environ.get("USER_LIST").split(".")
 
+client = commands.Bot(command_prefix="!")
 # Using a 480x320 monitor on the Raspberry Pi (using fullscreen for release on RPi)
 dev = True
 w_width = 480
@@ -141,7 +143,7 @@ class Main:
             self.master.overrideredirect(False)
             self.master.attributes("-fullscreen", True)
         self.master.bind("<F11>", lambda event: self.master.attributes("-fullscreen", not self.master.attributes("-fullscreen")))
-        self.master.bind("<Escape>", lambda event: self.master.destroy())
+        self.master.bind("<Escape>", lambda event: self.close())
         self.master.resizable(width=False, height=False)
 
         self.quit_btn = Button(self.master)
@@ -204,7 +206,7 @@ class Main:
         Tooltip(self.go_leave, text="Leave the house", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
     def close(self):
-        # Stop bot here later
+        client.loop.create_task(client.close())
         self.master.destroy()
 
     def button_action(self, button_desc, important=False):
@@ -242,7 +244,7 @@ class Time:
             self.top.overrideredirect(False)
             self.top.attributes("-fullscreen", True)
         self.top.bind("<F11>", lambda event: self.top.attributes("-fullscreen", not self.top.attributes("-fullscreen")))
-        self.top.bind("<Escape>", lambda event: self.top.destroy())
+        self.top.bind("<Escape>", lambda event: self.close())
         self.top.resizable(width=False, height=False)
 
         self.quit_btn = Button(self.top)
@@ -373,14 +375,41 @@ class Time:
 class ProcessData:
     def __init__(self):
         if f_priority:
-            print(f"Warning: Going to {f_desc} for {f_duration} in {f_when}.")
+            msg = f"Warning: Going to {f_desc} for {f_duration} in {f_when}."
         else:
-            print(f"Suggestion: Asking to {f_desc} in {f_when} for {f_duration}.")
+            msg = f"Suggestion: Asking to {f_desc} in {f_when} for {f_duration}."
+        try:
+            # Run in asyncio loop method a async function using args
+            # This allows to use async function without awaiting it
+            # Only issue is freezing the app while discord send the message
+            client.loop.run_until_complete(exec_cmd(msg))
+        except:
+            pass
 
-def main():
+def start_gui():
     root = Tk()
     main_window = Main(root)
     root.mainloop()
 
+async def exec_cmd(args):
+    for user_id in user_list:
+        await discord.utils.get(client.get_all_members(), id=int(user_id)).send(args)
+
+def start_bot():
+    @client.event
+    async def on_ready():
+        print("Running")
+
+    @client.command(pass_context=True)
+    async def up(ctx):
+        return await ctx.send("I'm up!")
+
+    async def exec_cmd(cmd):
+        print(cmd)
+
+    client.run(bot_token)
+
 if __name__ == "__main__":
-    main()
+    th = threading.Thread(target=start_gui)
+    th.start()
+    start_bot()
