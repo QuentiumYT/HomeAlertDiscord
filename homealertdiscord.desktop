@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=HomeAlertDiscord
+Version=1.0
+Comment=HomeAlertDiscord envoie des notifications de l'interface vers discord
+Icon=/home/pi/HomeAlertDiscord/img/info.png
+Path=/home/pi/HomeAlertDiscord/
+Exec=sudo python3 HomeAlertDiscord.py
+Type=Application
+Encoding=UTF-8
+Terminal=false
+Categories=None
