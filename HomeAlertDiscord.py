@@ -1,23 +1,28 @@
 #!/usr/bin/python3
 
-# Wildcard import for test and dev
-from tkinter import *
-from tkinter.ttk import *
-from tkinter.messagebox import *
+# GUI libraries
+import tkinter as tk
+import tkinter.ttk as ttk
 from PIL import Image, ImageTk
+# Discord bot and other libraries
 import discord, os, dotenv, threading
 from discord.ext import commands
+
+__version__ = 1.0
+__author__ = "QuentiumYT"
+__filename__ = "HomeAlertDiscord"
 
 dotenv.load_dotenv(".env")
 bot_token = os.environ.get("TOKEN")
 user_list = os.environ.get("USER_LIST").split(".")
 
 client = commands.Bot(command_prefix="!")
-# Using a 480x320 monitor on the Raspberry Pi (using fullscreen for release on RPi)
-dev = True
+# Using a 480x320 monitor on the Raspberry Pi
+# (use this resolution on windows and fullscreen in RPi)
 w_width = 480
 w_height = 320
 
+# Final variables for notification
 f_desc = f_duration = f_when = f_priority = None
 
 def usepic(pic, size):
@@ -102,14 +107,14 @@ class Tooltip:
         pad = self.pad
         widget = self.widget
 
-        self.tw = Toplevel(widget)
+        self.tw = tk.Toplevel(widget)
         # Leaves only the label and removes the app window
         self.tw.wm_overrideredirect(True)
 
-        win = Frame(self.tw, borderwidth=0)
-        label = Label(win, text=self.text, justify=LEFT, background=bg, relief=SOLID, borderwidth=0, wraplength=self.wraplength)
+        win = ttk.Frame(self.tw, borderwidth=0)
+        label = ttk.Label(win, text=self.text, justify="left", background=bg, relief="solid", borderwidth=0, wraplength=self.wraplength)
 
-        label.grid(padx=(pad[0], pad[2]), pady=(pad[1], pad[3]), sticky=NSEW)
+        label.grid(padx=(pad[0], pad[2]), pady=(pad[1], pad[3]), sticky="nsew")
         win.grid()
 
         x, y = tip_pos_calculator(widget, label)
@@ -134,7 +139,7 @@ class Main:
 
         self.master.title("HomeAlertDiscord - Main")
         self.master.update_idletasks()
-        if dev:
+        if os.name == "nt":
             x = (self.master.winfo_screenwidth() - w_width) // 2
             y = (self.master.winfo_screenheight() - w_height) // 2
             self.master.geometry("{}x{}+{}+{}".format(w_width, w_height, int(x), int(y)))
@@ -146,7 +151,7 @@ class Main:
         self.master.bind("<Escape>", lambda event: self.close())
         self.master.resizable(width=False, height=False)
 
-        self.quit_btn = Button(self.master)
+        self.quit_btn = ttk.Button(self.master)
         self.quit_btn.place(relx=0.0, rely=0.0, height=25, width=25)
         self.quit_btn.configure(cursor="tcross")
         self.pic1 = usepic("img/deny.png", 15)
@@ -154,7 +159,7 @@ class Main:
         self.quit_btn.configure(command=self.close)
         Tooltip(self.quit_btn, text="Exit", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.eat_starter = Button(self.master)
+        self.eat_starter = ttk.Button(self.master)
         self.eat_starter.place(relx=0.125, rely=0.156, height=85, width=85)
         self.pic_starter = usepic("img/starter.png", 75)
         self.eat_starter.configure(image=self.pic_starter)
@@ -162,7 +167,7 @@ class Main:
         self.eat_starter.configure(command=lambda: self.button_action("eat an appetizer"))
         Tooltip(self.eat_starter, text="Eat an appetizer", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.eat_meal = Button(self.master)
+        self.eat_meal = ttk.Button(self.master)
         self.eat_meal.place(relx=0.417, rely=0.156, height=85, width=85)
         self.pic_meal = usepic("img/meal.png", 75)
         self.eat_meal.configure(image=self.pic_meal)
@@ -170,7 +175,7 @@ class Main:
         self.eat_meal.configure(command=lambda: self.button_action("eat the meal", True))
         Tooltip(self.eat_meal, text="Eat the meal", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.eat_dessert = Button(self.master)
+        self.eat_dessert = ttk.Button(self.master)
         self.eat_dessert.place(relx=0.708, rely=0.156, height=85, width=85)
         self.pic_dessert = usepic("img/dessert.png", 75)
         self.eat_dessert.configure(image=self.pic_dessert)
@@ -178,10 +183,10 @@ class Main:
         self.eat_dessert.configure(command=lambda: self.button_action("eat dessert"))
         Tooltip(self.eat_dessert, text="Eat dessert", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.horizontal_sep = Separator(self.master)
+        self.horizontal_sep = ttk.Separator(self.master)
         self.horizontal_sep.place(relx=0.123, rely=0.488, relwidth=0.75)
 
-        self.watch_movie = Button(self.master)
+        self.watch_movie = ttk.Button(self.master)
         self.watch_movie.place(relx=0.125, rely=0.563, height=85, width=85)
         self.pic_movie = usepic("img/movie.png", 75)
         self.watch_movie.configure(image=self.pic_movie)
@@ -189,7 +194,7 @@ class Main:
         self.watch_movie.configure(command=lambda: self.button_action("watch a movie"))
         Tooltip(self.watch_movie, text="Watch a movie", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.go_outside = Button(self.master)
+        self.go_outside = ttk.Button(self.master)
         self.go_outside.place(relx=0.417, rely=0.563, height=85, width=85)
         self.pic_go = usepic("img/outside.png", 75)
         self.go_outside.configure(image=self.pic_go)
@@ -197,7 +202,7 @@ class Main:
         self.go_outside.configure(command=lambda: self.button_action("go outside"))
         Tooltip(self.go_outside, text="Go outside", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.go_leave = Button(self.master)
+        self.go_leave = ttk.Button(self.master)
         self.go_leave.place(relx=0.708, rely=0.563, height=85, width=85)
         self.pic_leave = usepic("img/leave.png", 75)
         self.go_leave.configure(image=self.pic_leave)
@@ -216,7 +221,7 @@ class Main:
         self.open_duration()
 
     def open_duration(self):
-        self.duration_w = Toplevel()
+        self.duration_w = tk.Toplevel()
         self.time_window = Time(self.duration_w, title="HomeAlertDiscord - Duration", w_count=1)
 
 class Time:
@@ -235,7 +240,7 @@ class Time:
         self.top.grab_set()
         self.top.focus()
         self.top.update_idletasks()
-        if dev:
+        if os.name == "nt":
             x = (self.top.winfo_screenwidth() - w_width) // 2
             y = (self.top.winfo_screenheight() - w_height) // 2
             self.top.geometry("{}x{}+{}+{}".format(w_width, w_height, int(x), int(y)))
@@ -247,7 +252,7 @@ class Time:
         self.top.bind("<Escape>", lambda event: self.close())
         self.top.resizable(width=False, height=False)
 
-        self.quit_btn = Button(self.top)
+        self.quit_btn = ttk.Button(self.top)
         self.quit_btn.place(relx=0.0, rely=0.0, height=25, width=25)
         self.quit_btn.configure(cursor="tcross")
         self.pic1 = usepic("img/deny.png", 15)
@@ -255,7 +260,7 @@ class Time:
         self.quit_btn.configure(command=self.close)
         Tooltip(self.quit_btn, text="Exit", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_0 = Button(self.top)
+        self.btn_0 = ttk.Button(self.top)
         self.btn_0.place(relx=0.063, rely=0.094, height=60, width=60)
         self.btn_0.configure(text="now")
         self.btn_0.configure(cursor="target")
@@ -265,93 +270,93 @@ class Time:
             self.btn_0.configure(text="∞")
             Tooltip(self.btn_0, text="Undefined", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_1 = Button(self.top)
+        self.btn_1 = ttk.Button(self.top)
         self.btn_1.place(relx=0.25, rely=0.094, height=60, width=60)
         self.btn_1.configure(text="1m")
         self.btn_1.configure(cursor="target")
         self.btn_1.configure(command=lambda: self.button_time(self.btn_1.cget("text")))
         Tooltip(self.btn_1, text="1 minute", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_3 = Button(self.top)
+        self.btn_3 = ttk.Button(self.top)
         self.btn_3.place(relx=0.438, rely=0.094, height=60, width=60)
         self.btn_3.configure(text="3m")
         self.btn_3.configure(cursor="target")
         self.btn_3.configure(command=lambda: self.button_time(self.btn_3.cget("text")))
         Tooltip(self.btn_3, text="3 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_5 = Button(self.top)
+        self.btn_5 = ttk.Button(self.top)
         self.btn_5.place(relx=0.625, rely=0.094, height=60, width=60)
         self.btn_5.configure(text="5m")
         self.btn_5.configure(cursor="target")
         self.btn_5.configure(command=lambda: self.button_time(self.btn_5.cget("text")))
         Tooltip(self.btn_5, text="5 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_15 = Button(self.top)
+        self.btn_15 = ttk.Button(self.top)
         self.btn_15.place(relx=0.813, rely=0.094, height=60, width=60)
         self.btn_15.configure(text="15m")
         self.btn_15.configure(cursor="target")
         self.btn_15.configure(command=lambda: self.button_time(self.btn_15.cget("text")))
         Tooltip(self.btn_15, text="15 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_20 = Button(self.top)
+        self.btn_20 = ttk.Button(self.top)
         self.btn_20.place(relx=0.063, rely=0.344, height=60, width=60)
         self.btn_20.configure(text="20m")
         self.btn_20.configure(cursor="target")
         self.btn_20.configure(command=lambda: self.button_time(self.btn_20.cget("text")))
         Tooltip(self.btn_20, text="20 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_30 = Button(self.top)
+        self.btn_30 = ttk.Button(self.top)
         self.btn_30.place(relx=0.25, rely=0.344, height=60, width=60)
         self.btn_30.configure(text="30m")
         self.btn_30.configure(cursor="target")
         self.btn_30.configure(command=lambda: self.button_time(self.btn_30.cget("text")))
         Tooltip(self.btn_30, text="30 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_60 = Button(self.top)
+        self.btn_60 = ttk.Button(self.top)
         self.btn_60.place(relx=0.438, rely=0.344, height=60, width=60)
         self.btn_60.configure(text="1h")
         self.btn_60.configure(cursor="target")
         self.btn_60.configure(command=lambda: self.button_time(self.btn_60.cget("text")))
         Tooltip(self.btn_60, text="1 hour", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_90 = Button(self.top)
+        self.btn_90 = ttk.Button(self.top)
         self.btn_90.place(relx=0.625, rely=0.344, height=60, width=60)
         self.btn_90.configure(text="1h30")
         self.btn_90.configure(cursor="target")
         self.btn_90.configure(command=lambda: self.button_time(self.btn_90.cget("text")))
         Tooltip(self.btn_90, text="1 hour and a half", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.btn_120 = Button(self.top)
+        self.btn_120 = ttk.Button(self.top)
         self.btn_120.place(relx=0.813, rely=0.344, height=60, width=60)
         self.btn_120.configure(text="2h")
         self.btn_120.configure(cursor="target")
         self.btn_120.configure(command=lambda: self.button_time(self.btn_120.cget("text")))
         Tooltip(self.btn_120, text="2 hours", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.horizontal_sep = Separator(self.top)
+        self.horizontal_sep = ttk.Separator(self.top)
         self.horizontal_sep.place(relx=0.063, rely=0.594, relwidth=0.875)
 
-        self.minus_btn = Button(self.top)
+        self.minus_btn = ttk.Button(self.top)
         self.minus_btn.place(relx=0.208, rely=0.656, height=40, width=40)
         self.minus_btn.configure(text="-")
         Tooltip(self.minus_btn, text="Decrease time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.duration_txt = StringVar()
+        self.duration_txt = tk.StringVar()
         self.duration_txt.set("2 minutes")
-        self.duration_lenght = Entry(self.top)
+        self.duration_lenght = ttk.Entry(self.top)
         self.duration_lenght.place(relx=0.333, rely=0.656, relheight=0.125, relwidth=0.333)
         self.duration_lenght.configure(state="readonly")
         self.duration_lenght.configure(textvariable=self.duration_txt)
         self.duration_lenght.configure(cursor="xterm")
 
-        self.plus_btn = Button(self.top)
+        self.plus_btn = ttk.Button(self.top)
         self.plus_btn.place(relx=0.708, rely=0.656, height=40, width=40)
         self.plus_btn.configure(text="+")
         Tooltip(self.minus_btn, text="Increase time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.scale_val = IntVar()
+        self.scale_val = tk.IntVar()
         self.scale_val.set(50)
-        self.scale_duration = Scale(self.top, from_=0, to=100)
+        self.scale_duration = ttk.Scale(self.top, from_=0, to=100)
         self.scale_duration.place(relx=0.083, rely=0.844, relwidth=0.833, relheight=0.0, height=26, bordermode="ignore")
         self.scale_duration.configure(variable=self.scale_val)
 
@@ -369,7 +374,7 @@ class Time:
         self.close()
 
     def open_when(self):
-        self.w_when = Toplevel()
+        self.w_when = tk.Toplevel()
         self.time_window2 = Time(self.w_when, title="HomeAlertDiscord - When", w_count=2)
 
 class ProcessData:
@@ -381,13 +386,13 @@ class ProcessData:
         try:
             # Run in asyncio loop method a async function using args
             # This allows to use async function without awaiting it
-            # Only issue is freezing the app while discord send the message
+            # Only issue is freezing the app while discord is sending the message
             client.loop.run_until_complete(exec_cmd(msg))
         except:
             pass
 
 def start_gui():
-    root = Tk()
+    root = tk.Tk()
     main_window = Main(root)
     root.mainloop()
 
