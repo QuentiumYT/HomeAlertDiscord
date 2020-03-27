@@ -15,8 +15,8 @@ __filename__ = "HomeAlertDiscord"
 dotenv.load_dotenv(".env")
 bot_token = os.environ.get("TOKEN")
 user_list = os.environ.get("USER_LIST").split(".")
-
 client = commands.Bot(command_prefix="!")
+
 # Using a 480x320 monitor on the Raspberry Pi
 # (use this resolution on windows and fullscreen in RPi)
 w_width = 480
@@ -139,14 +139,18 @@ class Main:
 
         self.master.title("HomeAlertDiscord - Main")
         self.master.update_idletasks()
+        self.master.protocol("WM_DELETE_WINDOW", self.close)
         if os.name == "nt":
             x = (self.master.winfo_screenwidth() - w_width) // 2
             y = (self.master.winfo_screenheight() - w_height) // 2
             self.master.geometry("{}x{}+{}+{}".format(w_width, w_height, int(x), int(y)))
+            self.master.iconbitmap("img/HomeAlertDiscord.ico")
         else:
             self.master.overrideredirect(True)
             self.master.overrideredirect(False)
             self.master.attributes("-fullscreen", True)
+            self.img = tk.PhotoImage(file="img/HomeAlertDiscord.png")
+            self.master.call("wm", "iconphoto", self.master._w, self.img)
         self.master.bind("<F11>", lambda event: self.master.attributes("-fullscreen", not self.master.attributes("-fullscreen")))
         self.master.bind("<Escape>", lambda event: self.close())
         self.master.resizable(width=False, height=False)
@@ -244,10 +248,13 @@ class Time:
             x = (self.top.winfo_screenwidth() - w_width) // 2
             y = (self.top.winfo_screenheight() - w_height) // 2
             self.top.geometry("{}x{}+{}+{}".format(w_width, w_height, int(x), int(y)))
+            self.top.iconbitmap("img/HomeAlertDiscord.ico")
         else:
             self.top.overrideredirect(True)
             self.top.overrideredirect(False)
             self.top.attributes("-fullscreen", True)
+            self.img = tk.PhotoImage(file="img/HomeAlertDiscord.png")
+            self.top.tk.call("wm", "iconphoto", self.top._w, self.img)
         self.top.bind("<F11>", lambda event: self.top.attributes("-fullscreen", not self.top.attributes("-fullscreen")))
         self.top.bind("<Escape>", lambda event: self.close())
         self.top.resizable(width=False, height=False)
