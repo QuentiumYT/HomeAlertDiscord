@@ -12,10 +12,13 @@ __version__ = 1.0
 __author__ = "QuentiumYT"
 __filename__ = "HomeAlertDiscord"
 
-dotenv.load_dotenv(".env")
-bot_token = os.environ.get("TOKEN")
-user_list = os.environ.get("USER_LIST").split(".")
-client = commands.Bot(command_prefix="!")
+bot_run = False
+
+if bot_run:
+    dotenv.load_dotenv(".env")
+    bot_token = os.environ.get("TOKEN")
+    user_list = os.environ.get("USER_LIST").split(".")
+    client = commands.Bot(command_prefix="!")
 
 # Using a 480x320 monitor on the Raspberry Pi
 # (use this resolution on windows and fullscreen in RPi)
@@ -158,8 +161,8 @@ class Main:
         self.quit_btn = ttk.Button(self.master)
         self.quit_btn.place(relx=0.0, rely=0.0, height=25, width=25)
         self.quit_btn.configure(cursor="tcross")
-        self.pic1 = usepic("img/deny.png", 15)
-        self.quit_btn.configure(image=self.pic1)
+        self.pic_close = usepic("img/deny.png", 15)
+        self.quit_btn.configure(image=self.pic_close)
         self.quit_btn.configure(command=self.close)
         Tooltip(self.quit_btn, text="Exit", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
@@ -215,7 +218,8 @@ class Main:
         Tooltip(self.go_leave, text="Leave the house", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
     def close(self):
-        client.loop.create_task(client.close())
+        if bot_run:
+            client.loop.create_task(client.close())
         self.master.destroy()
 
     def button_action(self, button_desc, important=False):
@@ -262,8 +266,8 @@ class Time:
         self.quit_btn = ttk.Button(self.top)
         self.quit_btn.place(relx=0.0, rely=0.0, height=25, width=25)
         self.quit_btn.configure(cursor="tcross")
-        self.pic1 = usepic("img/deny.png", 15)
-        self.quit_btn.configure(image=self.pic1)
+        self.pic_close = usepic("img/deny.png", 15)
+        self.quit_btn.configure(image=self.pic_close)
         self.quit_btn.configure(command=self.close)
         Tooltip(self.quit_btn, text="Exit", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
@@ -344,34 +348,46 @@ class Time:
         self.horizontal_sep.place(relx=0.063, rely=0.594, relwidth=0.875)
 
         self.minus_btn = ttk.Button(self.top)
-        self.minus_btn.place(relx=0.208, rely=0.656, height=40, width=40)
+        self.minus_btn.place(relx=0.104, rely=0.656, height=40, width=40)
         self.minus_btn.configure(text="-")
         Tooltip(self.minus_btn, text="Decrease time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.duration_txt = tk.StringVar()
-        self.duration_txt.set("2 minutes")
+        self.duration_txt.set("0 minutes")
         self.duration_lenght = ttk.Entry(self.top)
-        self.duration_lenght.place(relx=0.333, rely=0.656, relheight=0.125, relwidth=0.333)
+        self.duration_lenght.place(relx=0.229, rely=0.656, relheight=0.125, relwidth=0.333)
         self.duration_lenght.configure(state="readonly")
         self.duration_lenght.configure(textvariable=self.duration_txt)
         self.duration_lenght.configure(cursor="xterm")
 
         self.plus_btn = ttk.Button(self.top)
-        self.plus_btn.place(relx=0.708, rely=0.656, height=40, width=40)
+        self.plus_btn.place(relx=0.604, rely=0.656, height=40, width=40)
         self.plus_btn.configure(text="+")
         Tooltip(self.minus_btn, text="Increase time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.scale_val = tk.IntVar()
-        self.scale_val.set(50)
-        self.scale_duration = ttk.Scale(self.top, from_=0, to=100)
+        self.scale_val.set(5)
+        self.scale_duration = Slider(self.top, from_=0, to_=10, change=self.duration_txt)
         self.scale_duration.place(relx=0.083, rely=0.844, relwidth=0.833, relheight=0.0, height=26, bordermode="ignore")
         self.scale_duration.configure(variable=self.scale_val)
+
+        self.submit_btn = ttk.Button(top)
+        self.submit_btn.place(relx=0.771, rely=0.625, height=60, width=60)
+        self.submit_btn.configure(cursor="tcross")
+        self.pic_submit = usepic("img/accept.png", 50)
+        self.submit_btn.configure(image=self.pic_submit)
+        self.submit_btn.configure(command=lambda: self.button_time(self.duration_txt.get()))
+        Tooltip(self.submit_btn, text="Submit slider time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
     def close(self):
         self.top.destroy()
 
     def button_time(self, duration):
         global f_duration, f_when
+        if "." in duration:
+            d = duration.replace(" minutes", "")
+            m, s = d.split(".")[0], d.split(".")[1]
+            duration = f"{m} minutes and {int(float(s)*0.6)} seconds"
         if self.w_count == 1:
             f_duration = duration
             self.open_when()
@@ -384,19 +400,59 @@ class Time:
         self.w_when = tk.Toplevel()
         self.time_window2 = Time(self.w_when, title="HomeAlertDiscord - When", w_count=2)
 
+class Slider(tk.Frame):
+    def __init__(self, parent=None, from_=0, to_=100, change=None):
+        self.change = change
+
+        tk.Frame.__init__(self, parent)
+        self.function = 0
+        self.slide = ttk.Scale(self, orient="horizontal", command=self.set_exp, length=200, from_=from_, to_=to_)
+        self.slide.pack(side="right", expand=1, fill="x")
+
+        if not self.change:
+            self.text = tk.Label(self)
+            self.text.pack(side="top", fill="both")
+
+    def configure(self, variable):
+        self.slide.set(variable.get())
+
+    def update(self, variable):
+        self.variable = str(variable) + " minutes"
+        self.change.set(self.variable)
+
+    def set_log(self, val):
+        self.unimap = {"1": u"\u00b9", "2": u"\u00b2", "3": u"\u00b3",
+                       "4": u"\u2074", "5": u"\u2075", "6": u"\u2076",
+                       "7": u"\u2077", "8": u"\u2078", "9": u"\u2079"}
+        self.val = int(float(val))
+        self.function = 10**self.val
+        if self.change:
+            self.update(round(self.function, 2))
+        else:
+            self.text.configure(text="10%s" % (self.unimap[str(self.val)]))
+
+    def set_exp(self, val):
+        self.val = float(val)
+        self.function = self.val - 0.5 * self.val**2 + 0.1 * self.val**3
+        if self.change:
+            self.update(round(self.function, 2))
+        else:
+            self.text.configure(text=str(round(self.function, 2)))
+
 class ProcessData:
     def __init__(self):
         if f_priority:
             msg = f"Warning: Going to {f_desc} for {f_duration} in {f_when}."
         else:
             msg = f"Suggestion: Asking to {f_desc} in {f_when} for {f_duration}."
-        try:
-            # Run in asyncio loop method a async function using args
-            # This allows to use async function without awaiting it
-            # Only issue is freezing the app while discord is sending the message
-            client.loop.run_until_complete(exec_cmd(msg))
-        except:
-            pass
+        if bot_run:
+            try:
+                # Run in asyncio loop method a async function using args
+                # This allows to use async function without awaiting it
+                # Only issue is freezing the app while discord is sending the message
+                client.loop.run_until_complete(exec_cmd(msg))
+            except:
+                pass
 
 def start_gui():
     root = tk.Tk()
@@ -414,7 +470,7 @@ def start_bot():
 
     @client.command(pass_context=True)
     async def up(ctx):
-        return await ctx.send("I'm up!")
+        return await ctx.send("The bot is up!")
 
     async def exec_cmd(cmd):
         print(cmd)
@@ -422,6 +478,9 @@ def start_bot():
     client.run(bot_token)
 
 if __name__ == "__main__":
-    th = threading.Thread(target=start_gui)
-    th.start()
-    start_bot()
+    if bot_run:
+        th = threading.Thread(target=start_gui)
+        th.start()
+        start_bot()
+    else:
+        start_gui()
