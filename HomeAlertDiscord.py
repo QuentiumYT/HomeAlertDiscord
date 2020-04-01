@@ -5,8 +5,13 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from PIL import Image, ImageTk
 # Discord bot and other libraries
-import discord, os, dotenv, threading
+import discord, dotenv
 from discord.ext import commands
+# System libraries
+import os, threading
+# Math libraries
+from sympy import var, Eq, solve
+x = var("x")
 
 __version__ = 1.0
 __author__ = "QuentiumYT"
@@ -24,6 +29,9 @@ if bot_run:
 # (use this resolution on windows and fullscreen in RPi)
 w_width = 480
 w_height = 320
+
+# Equation for exponential slider
+equation = 0.1 * x**3 - 0.5 * x**2 + x
 
 # Final variables for notification
 f_desc = f_duration = f_when = f_priority = None
@@ -130,6 +138,45 @@ class Tooltip:
             tw.destroy()
         self.tw = None
 
+class Slider(tk.Frame):
+    def __init__(self, parent=None, from_=0, to_=100, change=None):
+        tk.Frame.__init__(self, parent)
+
+        self.change = change
+        self.result = 0
+        self.slide = ttk.Scale(self, orient="horizontal", command=self.set_exp, length=200, from_=from_, to_=to_)
+        self.slide.pack(side="right", expand=1, fill="x")
+
+        if not self.change:
+            self.text = tk.Label(self)
+            self.text.pack(side="top", fill="both")
+
+    def configure(self, variable):
+        self.slide.set(variable.get())
+
+    def update(self, variable):
+        self.variable = str(variable) + " minutes"
+        self.change.set(self.variable)
+
+    def set_log(self, val):
+        self.unimap = {"1": u"\u00b9", "2": u"\u00b2", "3": u"\u00b3",
+                       "4": u"\u2074", "5": u"\u2075", "6": u"\u2076",
+                       "7": u"\u2077", "8": u"\u2078", "9": u"\u2079"}
+        self.val = int(float(val))
+        self.result = 10**self.val
+        if self.change:
+            self.update(round(self.result, 2))
+        else:
+            self.text.configure(text="10%s" % (self.unimap[str(self.val)]))
+
+    def set_exp(self, val):
+        self.val = val
+        self.result = float(equation.subs(x, self.val))
+        if self.change:
+            self.update(round(self.result, 2))
+        else:
+            self.text.configure(text=str(round(self.result, 2)))
+
 class Main:
     """
     Main selection window
@@ -144,9 +191,9 @@ class Main:
         self.master.update_idletasks()
         self.master.protocol("WM_DELETE_WINDOW", self.close)
         if os.name == "nt":
-            x = (self.master.winfo_screenwidth() - w_width) // 2
-            y = (self.master.winfo_screenheight() - w_height) // 2
-            self.master.geometry("{}x{}+{}+{}".format(w_width, w_height, int(x), int(y)))
+            self.x = (self.master.winfo_screenwidth() - w_width) // 2
+            self.y = (self.master.winfo_screenheight() - w_height) // 2
+            self.master.geometry("{}x{}+{}+{}".format(w_width, w_height, self.x, self.y))
             self.master.iconbitmap("img/HomeAlertDiscord.ico")
         else:
             self.master.overrideredirect(True)
@@ -249,9 +296,9 @@ class Time:
         self.top.focus()
         self.top.update_idletasks()
         if os.name == "nt":
-            x = (self.top.winfo_screenwidth() - w_width) // 2
-            y = (self.top.winfo_screenheight() - w_height) // 2
-            self.top.geometry("{}x{}+{}+{}".format(w_width, w_height, int(x), int(y)))
+            self.x = (self.top.winfo_screenwidth() - w_width) // 2
+            self.y = (self.top.winfo_screenheight() - w_height) // 2
+            self.top.geometry("{}x{}+{}+{}".format(w_width, w_height, self.x, self.y))
             self.top.iconbitmap("img/HomeAlertDiscord.ico")
         else:
             self.top.overrideredirect(True)
@@ -347,29 +394,32 @@ class Time:
         self.horizontal_sep = ttk.Separator(self.top)
         self.horizontal_sep.place(relx=0.063, rely=0.594, relwidth=0.875)
 
-        self.minus_btn = ttk.Button(self.top)
-        self.minus_btn.place(relx=0.104, rely=0.656, height=40, width=40)
-        self.minus_btn.configure(text="-")
-        Tooltip(self.minus_btn, text="Decrease time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
-
         self.duration_txt = tk.StringVar()
-        self.duration_txt.set("0 minutes")
         self.duration_lenght = ttk.Entry(self.top)
         self.duration_lenght.place(relx=0.229, rely=0.656, relheight=0.125, relwidth=0.333)
         self.duration_lenght.configure(state="readonly")
         self.duration_lenght.configure(textvariable=self.duration_txt)
         self.duration_lenght.configure(cursor="xterm")
 
+        self.minus_btn = ttk.Button(self.top)
+        self.minus_btn.place(relx=0.104, rely=0.656, height=40, width=40)
+        self.minus_btn.configure(text="-")
+        self.minus_btn.configure(cursor="target")
+        self.minus_btn.configure(command=lambda: self.slider_time(obj=self.duration_txt, action="remove"))
+        Tooltip(self.minus_btn, text="Decrease time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
+
         self.plus_btn = ttk.Button(self.top)
         self.plus_btn.place(relx=0.604, rely=0.656, height=40, width=40)
         self.plus_btn.configure(text="+")
+        self.plus_btn.configure(cursor="target")
+        self.plus_btn.configure(command=lambda: self.slider_time(obj=self.duration_txt, action="add"))
         Tooltip(self.minus_btn, text="Increase time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
-        self.scale_val = tk.IntVar()
-        self.scale_val.set(5)
-        self.scale_duration = Slider(self.top, from_=0, to_=10, change=self.duration_txt)
-        self.scale_duration.place(relx=0.083, rely=0.844, relwidth=0.833, relheight=0.0, height=26, bordermode="ignore")
-        self.scale_duration.configure(variable=self.scale_val)
+        self.slider_val = tk.DoubleVar()
+        self.slider_val.set(5)
+        self.slider_duration = Slider(self.top, from_=0, to_=10, change=self.duration_txt)
+        self.slider_duration.place(relx=0.083, rely=0.844, relwidth=0.833, relheight=0.0, height=26, bordermode="ignore")
+        self.slider_duration.configure(variable=self.slider_val)
 
         self.submit_btn = ttk.Button(top)
         self.submit_btn.place(relx=0.771, rely=0.625, height=60, width=60)
@@ -384,60 +434,48 @@ class Time:
 
     def button_time(self, duration):
         global f_duration, f_when
-        if "." in duration:
-            d = duration.replace(" minutes", "")
-            m, s = d.split(".")[0], d.split(".")[1]
-            duration = f"{m} minutes and {int(float(s)*0.6)} seconds"
+
+        self.duration = duration
+
+        if "." in self.duration:
+            self.duration_raw = self.duration.replace(" minutes", "")
+            self.min = self.duration_raw.split(".")[0]
+            self.sec = self.duration_raw.split(".")[1]
+            self.duration = f"{self.min} minutes and {int(float(self.sec)*0.6)} seconds"
         if self.w_count == 1:
-            f_duration = duration
+            f_duration = self.duration
             self.open_when()
         else:
-            f_when = duration
+            f_when = self.duration
             ProcessData()
         self.close()
+
+    def slider_time(self, obj, action="add"):
+        self.action = action
+        self.current_time = obj.get()
+
+        self.exact_duration = float(self.current_time.split()[0])
+        if self.action == "add":
+            if self.exact_duration < 59:
+                self.new_time = self.exact_duration + 1
+            else:
+                self.new_time = 60
+        else:
+            if self.exact_duration > 0:
+                self.new_time = self.exact_duration - 1
+            else:
+                self.new_time = 0
+        self.duration_txt.set(str(self.new_time) + " minutes")
+        if self.new_time == 0.0:
+            self.new_time = 0
+        self.eq = Eq(equation, self.new_time)
+        self.result = solve(self.eq)[0]
+        self.slider_val.set(self.result)
+        self.slider_duration.configure(variable=self.slider_val)
 
     def open_when(self):
         self.w_when = tk.Toplevel()
         self.time_window2 = Time(self.w_when, title="HomeAlertDiscord - When", w_count=2)
-
-class Slider(tk.Frame):
-    def __init__(self, parent=None, from_=0, to_=100, change=None):
-        self.change = change
-
-        tk.Frame.__init__(self, parent)
-        self.function = 0
-        self.slide = ttk.Scale(self, orient="horizontal", command=self.set_exp, length=200, from_=from_, to_=to_)
-        self.slide.pack(side="right", expand=1, fill="x")
-
-        if not self.change:
-            self.text = tk.Label(self)
-            self.text.pack(side="top", fill="both")
-
-    def configure(self, variable):
-        self.slide.set(variable.get())
-
-    def update(self, variable):
-        self.variable = str(variable) + " minutes"
-        self.change.set(self.variable)
-
-    def set_log(self, val):
-        self.unimap = {"1": u"\u00b9", "2": u"\u00b2", "3": u"\u00b3",
-                       "4": u"\u2074", "5": u"\u2075", "6": u"\u2076",
-                       "7": u"\u2077", "8": u"\u2078", "9": u"\u2079"}
-        self.val = int(float(val))
-        self.function = 10**self.val
-        if self.change:
-            self.update(round(self.function, 2))
-        else:
-            self.text.configure(text="10%s" % (self.unimap[str(self.val)]))
-
-    def set_exp(self, val):
-        self.val = float(val)
-        self.function = self.val - 0.5 * self.val**2 + 0.1 * self.val**3
-        if self.change:
-            self.update(round(self.function, 2))
-        else:
-            self.text.configure(text=str(round(self.function, 2)))
 
 class ProcessData:
     def __init__(self):
