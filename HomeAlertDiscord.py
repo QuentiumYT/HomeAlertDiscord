@@ -146,6 +146,7 @@ class Slider(tk.Frame):
         self.result = 0
         self.slide = ttk.Scale(self, orient="horizontal", command=self.set_exp, length=200, from_=from_, to_=to_)
         self.slide.pack(side="right", expand=1, fill="x")
+        self.slide.configure(takefocus=0)
 
         if not self.change:
             self.text = tk.Label(self)
@@ -207,11 +208,21 @@ class Main:
 
         self.quit_btn = ttk.Button(self.master)
         self.quit_btn.place(relx=0.0, rely=0.0, height=25, width=25)
+        self.quit_btn.configure(takefocus=0)
         self.quit_btn.configure(cursor="tcross")
         self.pic_close = usepic("img/deny.png", 15)
         self.quit_btn.configure(image=self.pic_close)
         self.quit_btn.configure(command=self.close)
         Tooltip(self.quit_btn, text="Exit", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
+
+        self.info_btn = ttk.Button(self.master)
+        self.info_btn.place(relx=0.947, rely=0.0, height=25, width=25)
+        self.info_btn.configure(takefocus=0)
+        self.info_btn.configure(cursor="tcross")
+        self.pic_info = usepic("img/info.png", 15)
+        self.info_btn.configure(image=self.pic_info)
+        self.info_btn.configure(command=self.open_info)
+        Tooltip(self.info_btn, text="About", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.eat_starter = ttk.Button(self.master)
         self.eat_starter.place(relx=0.125, rely=0.156, height=85, width=85)
@@ -277,13 +288,17 @@ class Main:
 
     def open_duration(self):
         self.duration_w = tk.Toplevel()
-        self.time_window = Time(self.duration_w, title="HomeAlertDiscord - Duration", w_count=1)
+        Time(self.duration_w, title="HomeAlertDiscord - Duration", w_count=1)
+
+    def open_info(self):
+        self.info_w = tk.Toplevel()
+        Info(self.info_w, title="HomeAlertDiscord - Informations")
 
 class Time:
     """
     Time selector window
     >>> top = Toplevel()
-    >>> Time(top, title="Toplevel title", w_count="")
+    >>> Time(top, title="Toplevel title", w_count=1)
     """
 
     def __init__(self, top, title, w_count):
@@ -312,11 +327,21 @@ class Time:
 
         self.quit_btn = ttk.Button(self.top)
         self.quit_btn.place(relx=0.0, rely=0.0, height=25, width=25)
+        self.quit_btn.configure(takefocus=0)
         self.quit_btn.configure(cursor="tcross")
         self.pic_close = usepic("img/deny.png", 15)
         self.quit_btn.configure(image=self.pic_close)
         self.quit_btn.configure(command=self.close)
         Tooltip(self.quit_btn, text="Exit", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
+
+        self.info_btn = ttk.Button(self.top)
+        self.info_btn.place(relx=0.947, rely=0.0, height=25, width=25)
+        self.info_btn.configure(takefocus=0)
+        self.info_btn.configure(cursor="tcross")
+        self.pic_info = usepic("img/info.png", 15)
+        self.info_btn.configure(image=self.pic_info)
+        self.info_btn.configure(command=self.open_info)
+        Tooltip(self.info_btn, text="About", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_0 = ttk.Button(self.top)
         self.btn_0.place(relx=0.063, rely=0.094, height=60, width=60)
@@ -398,6 +423,7 @@ class Time:
         self.duration_lenght = ttk.Entry(self.top)
         self.duration_lenght.place(relx=0.229, rely=0.656, relheight=0.125, relwidth=0.333)
         self.duration_lenght.configure(state="readonly")
+        self.duration_lenght.configure(takefocus=0)
         self.duration_lenght.configure(textvariable=self.duration_txt)
         self.duration_lenght.configure(cursor="xterm")
 
@@ -428,6 +454,10 @@ class Time:
         self.submit_btn.configure(image=self.pic_submit)
         self.submit_btn.configure(command=lambda: self.button_time(self.duration_txt.get()))
         Tooltip(self.submit_btn, text="Submit slider time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
+
+        self.top.bind("<Return>", lambda x: self.button_time(self.duration_txt.get()))
+        self.top.bind("<minus>", lambda x: self.slider_time(obj=self.duration_txt, action="remove"))
+        self.top.bind("<plus>", lambda x: self.slider_time(obj=self.duration_txt, action="add"))
 
     def close(self):
         self.top.destroy()
@@ -475,7 +505,93 @@ class Time:
 
     def open_when(self):
         self.w_when = tk.Toplevel()
-        self.time_window2 = Time(self.w_when, title="HomeAlertDiscord - When", w_count=2)
+        Time(self.w_when, title="HomeAlertDiscord - When", w_count=2)
+
+    def open_info(self):
+        self.info_w = tk.Toplevel()
+        Info(self.info_w, title="HomeAlertDiscord - Informations")
+
+class Info:
+    """
+    Information window
+    >>> top = Toplevel()
+    >>> Info(top, title="Toplevel title")
+    """
+
+    def __init__(self, top, title):
+        self.top = top
+        self.title = title
+        self.font1 = "-family {Segoe UI} -size 14 -weight bold"
+
+        self.top.title(self.title)
+        self.top.grab_set()
+        self.top.focus()
+        self.top.update_idletasks()
+        if os.name == "nt":
+            self.x = (self.top.winfo_screenwidth() - w_width + 100) // 2
+            self.y = (self.top.winfo_screenheight() - w_height + 100) // 2
+            self.top.geometry("{}x{}+{}+{}".format(w_width - 100, w_height - 100, self.x, self.y))
+            self.top.iconbitmap("img/HomeAlertDiscord.ico")
+        else:
+            self.top.overrideredirect(True)
+            self.top.overrideredirect(False)
+            self.top.attributes("-fullscreen", True)
+            self.img = tk.PhotoImage(file="img/HomeAlertDiscord.png")
+            self.top.tk.call("wm", "iconphoto", self.top._w, self.img)
+        self.top.bind("<F11>", lambda event: self.top.attributes("-fullscreen", not self.top.attributes("-fullscreen")))
+        self.top.bind("<Escape>", lambda event: self.close())
+        self.top.resizable(width=False, height=False)
+
+        self.picture = ttk.Label(self.top)
+        self.picture.place(relx=0.053, rely=0.136, height=100, width=110)
+        self.pic_logo = usepic("img/HomeAlertDiscord.png", 98)
+        self.picture.configure(image=self.pic_logo)
+
+        self.title = ttk.Label(self.top)
+        self.title.place(relx=0.395, rely=0.091, height=29, width=176)
+        self.title.configure(font=self.font1)
+        self.title.configure(text="HomeAlertDiscord")
+
+        self.copyright = ttk.Label(self.top)
+        self.copyright.place(relx=0.395, rely=0.273, height=19, width=153)
+        self.copyright.configure(text="Copyright © 2020 Quentin L")
+
+        self.TSeparator1 = ttk.Separator(self.top)
+        self.TSeparator1.place(relx=0.395, rely=0.409, relwidth=0.526)
+
+        self.support = ttk.Label(self.top)
+        self.support.place(relx=0.395, rely=0.455, height=19, width=123)
+        self.support.configure(text="Support and contact:")
+
+        self.website = ttk.Label(self.top)
+        self.website.place(relx=0.395, rely=0.591, height=19, width=133)
+        self.website.configure(foreground="blue")
+        self.website.configure(text="quentium.fr/en")
+        self.website.configure(cursor="hand2")
+        self.website.bind("<Button-1>", lambda x: self.open_link("https://quentium.fr/en/"))
+
+        self.github = ttk.Label(self.top)
+        self.github.place(relx=0.395, rely=0.682, height=19, width=183)
+        self.github.configure(foreground="blue")
+        self.github.configure(text="github.com/QuentiumYT")
+        self.github.configure(cursor="hand2")
+        self.github.bind("<Button-1>", lambda x: self.open_link("https://github.com/QuentiumYT/"))
+
+        self.TSeparator2 = ttk.Separator(self.top)
+        self.TSeparator2.place(relx=0.395, rely=0.818, relwidth=0.526)
+
+        self.paypal = ttk.Label(self.top)
+        self.paypal.place(relx=0.395, rely=0.864, height=19, width=93)
+        self.paypal.configure(foreground="blue")
+        self.paypal.configure(text="PayPal Donation")
+        self.paypal.configure(cursor="hand2")
+        self.paypal.bind("<Button-1>", lambda x: self.open_link("https://paypal.me/QuentiumYT/"))
+
+    def close(self):
+        self.top.destroy()
+
+    def open_link(self, link):
+        os.system("start " + link)
 
 class ProcessData:
     def __init__(self):
