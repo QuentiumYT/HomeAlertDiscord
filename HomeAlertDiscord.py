@@ -187,6 +187,7 @@ class Main:
 
     def __init__(self, master):
         self.master = master
+        self.font = "-family {Shentox 12} -size 12 -weight bold"
 
         self.master.title("HomeAlertDiscord - Main")
         self.master.update_idletasks()
@@ -223,6 +224,12 @@ class Main:
         self.info_btn.configure(image=self.pic_info)
         self.info_btn.configure(command=self.open_info)
         Tooltip(self.info_btn, text="About", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
+
+        self.text_window = ttk.Label(self.master)
+        self.text_window.place(relx=0.292, rely=0.019, height=22, width=200)
+        self.text_window.configure(font=self.font)
+        self.text_window.configure(anchor="center")
+        self.text_window.configure(text="Select any activity")
 
         self.eat_starter = ttk.Button(self.master)
         self.eat_starter.place(relx=0.125, rely=0.156, height=85, width=85)
@@ -305,6 +312,7 @@ class Time:
         self.top = top
         self.w_count = w_count
         self.title = title
+        self.font = "-family {Shentox 12} -size 12 -weight bold"
 
         self.top.title(self.title)
         self.top.grab_set()
@@ -343,8 +351,17 @@ class Time:
         self.info_btn.configure(command=self.open_info)
         Tooltip(self.info_btn, text="About", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
+        self.text_window = ttk.Label(self.top)
+        self.text_window.place(relx=0.292, rely=0.019, height=22, width=200)
+        self.text_window.configure(font=self.font)
+        self.text_window.configure(anchor="center")
+        if self.w_count == 1:
+            self.text_window.configure(text="Select the duration")
+        else:
+            self.text_window.configure(text="Select the moment")
+
         self.btn_0 = ttk.Button(self.top)
-        self.btn_0.place(relx=0.063, rely=0.094, height=60, width=60)
+        self.btn_0.place(relx=0.063, rely=0.12, height=60, width=60)
         self.btn_0.configure(text="now")
         self.btn_0.configure(cursor="target")
         self.btn_0.configure(command=lambda: self.button_time(self.btn_0.cget("text")))
@@ -354,63 +371,63 @@ class Time:
             Tooltip(self.btn_0, text="Undefined", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_1 = ttk.Button(self.top)
-        self.btn_1.place(relx=0.25, rely=0.094, height=60, width=60)
-        self.btn_1.configure(text="1m")
+        self.btn_1.place(relx=0.25, rely=0.12, height=60, width=60)
+        self.btn_1.configure(text="1min")
         self.btn_1.configure(cursor="target")
         self.btn_1.configure(command=lambda: self.button_time(self.btn_1.cget("text")))
         Tooltip(self.btn_1, text="1 minute", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_3 = ttk.Button(self.top)
-        self.btn_3.place(relx=0.438, rely=0.094, height=60, width=60)
-        self.btn_3.configure(text="3m")
+        self.btn_3.place(relx=0.438, rely=0.12, height=60, width=60)
+        self.btn_3.configure(text="3min")
         self.btn_3.configure(cursor="target")
         self.btn_3.configure(command=lambda: self.button_time(self.btn_3.cget("text")))
         Tooltip(self.btn_3, text="3 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_5 = ttk.Button(self.top)
-        self.btn_5.place(relx=0.625, rely=0.094, height=60, width=60)
-        self.btn_5.configure(text="5m")
+        self.btn_5.place(relx=0.625, rely=0.12, height=60, width=60)
+        self.btn_5.configure(text="5min")
         self.btn_5.configure(cursor="target")
         self.btn_5.configure(command=lambda: self.button_time(self.btn_5.cget("text")))
         Tooltip(self.btn_5, text="5 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_15 = ttk.Button(self.top)
-        self.btn_15.place(relx=0.813, rely=0.094, height=60, width=60)
-        self.btn_15.configure(text="15m")
+        self.btn_15.place(relx=0.813, rely=0.12, height=60, width=60)
+        self.btn_15.configure(text="15min")
         self.btn_15.configure(cursor="target")
         self.btn_15.configure(command=lambda: self.button_time(self.btn_15.cget("text")))
         Tooltip(self.btn_15, text="15 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_20 = ttk.Button(self.top)
-        self.btn_20.place(relx=0.063, rely=0.344, height=60, width=60)
-        self.btn_20.configure(text="20m")
+        self.btn_20.place(relx=0.063, rely=0.364, height=60, width=60)
+        self.btn_20.configure(text="20min")
         self.btn_20.configure(cursor="target")
         self.btn_20.configure(command=lambda: self.button_time(self.btn_20.cget("text")))
         Tooltip(self.btn_20, text="20 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_30 = ttk.Button(self.top)
-        self.btn_30.place(relx=0.25, rely=0.344, height=60, width=60)
-        self.btn_30.configure(text="30m")
+        self.btn_30.place(relx=0.25, rely=0.364, height=60, width=60)
+        self.btn_30.configure(text="30min")
         self.btn_30.configure(cursor="target")
         self.btn_30.configure(command=lambda: self.button_time(self.btn_30.cget("text")))
         Tooltip(self.btn_30, text="30 minutes", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_60 = ttk.Button(self.top)
-        self.btn_60.place(relx=0.438, rely=0.344, height=60, width=60)
+        self.btn_60.place(relx=0.438, rely=0.364, height=60, width=60)
         self.btn_60.configure(text="1h")
         self.btn_60.configure(cursor="target")
         self.btn_60.configure(command=lambda: self.button_time(self.btn_60.cget("text")))
         Tooltip(self.btn_60, text="1 hour", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_90 = ttk.Button(self.top)
-        self.btn_90.place(relx=0.625, rely=0.344, height=60, width=60)
+        self.btn_90.place(relx=0.625, rely=0.364, height=60, width=60)
         self.btn_90.configure(text="1h30")
         self.btn_90.configure(cursor="target")
         self.btn_90.configure(command=lambda: self.button_time(self.btn_90.cget("text")))
         Tooltip(self.btn_90, text="1 hour and a half", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.btn_120 = ttk.Button(self.top)
-        self.btn_120.place(relx=0.813, rely=0.344, height=60, width=60)
+        self.btn_120.place(relx=0.813, rely=0.364, height=60, width=60)
         self.btn_120.configure(text="2h")
         self.btn_120.configure(cursor="target")
         self.btn_120.configure(command=lambda: self.button_time(self.btn_120.cget("text")))
@@ -421,25 +438,25 @@ class Time:
 
         self.duration_txt = tk.StringVar()
         self.duration_lenght = ttk.Entry(self.top)
-        self.duration_lenght.place(relx=0.229, rely=0.656, relheight=0.125, relwidth=0.333)
+        self.duration_lenght.place(relx=0.229, rely=0.67, relheight=0.125, relwidth=0.333)
         self.duration_lenght.configure(state="readonly")
         self.duration_lenght.configure(takefocus=0)
         self.duration_lenght.configure(textvariable=self.duration_txt)
         self.duration_lenght.configure(cursor="xterm")
 
         self.minus_btn = ttk.Button(self.top)
-        self.minus_btn.place(relx=0.104, rely=0.656, height=40, width=40)
+        self.minus_btn.place(relx=0.104, rely=0.67, height=40, width=40)
         self.minus_btn.configure(text="-")
         self.minus_btn.configure(cursor="target")
         self.minus_btn.configure(command=lambda: self.slider_time(obj=self.duration_txt, action="remove"))
-        Tooltip(self.minus_btn, text="Decrease time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
+        Tooltip(self.minus_btn, text="Decrease time by 1min", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.plus_btn = ttk.Button(self.top)
-        self.plus_btn.place(relx=0.604, rely=0.656, height=40, width=40)
+        self.plus_btn.place(relx=0.604, rely=0.67, height=40, width=40)
         self.plus_btn.configure(text="+")
         self.plus_btn.configure(cursor="target")
         self.plus_btn.configure(command=lambda: self.slider_time(obj=self.duration_txt, action="add"))
-        Tooltip(self.minus_btn, text="Increase time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
+        Tooltip(self.plus_btn, text="Increase time by 1min", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.slider_val = tk.DoubleVar()
         self.slider_val.set(5)
@@ -448,12 +465,12 @@ class Time:
         self.slider_duration.configure(variable=self.slider_val)
 
         self.submit_btn = ttk.Button(top)
-        self.submit_btn.place(relx=0.771, rely=0.625, height=60, width=60)
+        self.submit_btn.place(relx=0.771, rely=0.64, height=60, width=60)
         self.submit_btn.configure(cursor="tcross")
         self.pic_submit = usepic("img/accept.png", 50)
         self.submit_btn.configure(image=self.pic_submit)
         self.submit_btn.configure(command=lambda: self.button_time(self.duration_txt.get()))
-        Tooltip(self.submit_btn, text="Submit slider time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
+        Tooltip(self.submit_btn, text="Submit specific time", bg="#FFFFFF", pad=(0, 0, 0, 0), waittime="400", wraplength="0")
 
         self.top.bind("<Return>", lambda x: self.button_time(self.duration_txt.get()))
         self.top.bind("<minus>", lambda x: self.slider_time(obj=self.duration_txt, action="remove"))
@@ -521,7 +538,7 @@ class Info:
     def __init__(self, top, title):
         self.top = top
         self.title = title
-        self.font1 = "-family {Segoe UI} -size 14 -weight bold"
+        self.font = "-family {Segoe UI} -size 14 -weight bold"
 
         self.top.title(self.title)
         self.top.grab_set()
@@ -549,7 +566,7 @@ class Info:
 
         self.title = ttk.Label(self.top)
         self.title.place(relx=0.395, rely=0.091, height=29, width=176)
-        self.title.configure(font=self.font1)
+        self.title.configure(font=self.font)
         self.title.configure(text="HomeAlertDiscord")
 
         self.copyright = ttk.Label(self.top)
